@@ -1,7 +1,10 @@
-﻿namespace PassWallet.Infrastructure.DTO
+﻿using System;
+
+namespace PassWallet.Infrastructure.DTO
 {
     public class PasswordDto
     {
+        public Guid Id { get; set; }
         public string PasswordHash { get; set; }
         public string Website { get; set; }
         public string Login { get; set; }

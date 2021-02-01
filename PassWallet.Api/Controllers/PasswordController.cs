@@ -1,10 +1,14 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.AspNetCore.Mvc;
 using PassWallet.Core.Entities;
 using PassWallet.Core.Repositories;
 using PassWallet.Infrastructure.DAL.Repositories;
 using PassWallet.Infrastructure.DTO;
+using PassWallet.Infrastructure.DTO.Commands;
+using PassWallet.Infrastructure.Services;
 
 namespace PassWallet.Api.Controllers
 {
@@ -12,25 +16,41 @@ namespace PassWallet.Api.Controllers
     [Route("[controller]")]
     public class PasswordController : ControllerBase
     {
-        private IPasswordRepository _passwordRepository; //FOR TEST
+        private readonly IPasswordService _passwordService;
 
-        public PasswordController(IPasswordRepository passwordRepository)
+        public PasswordController(IPasswordService passwordService)
         {
-            _passwordRepository = passwordRepository;
+            _passwordService = passwordService;
         }
-        [HttpPost]
-        public async Task<IActionResult> Post(PasswordDto dto)
+        
+        [HttpGet("{id}")]
+        public async Task<ActionResult<PasswordDto>> GetAsync(Guid id)
         {
-            var pass = new Password
+            var password = await _passwordService.GetAsync(id);
+            if (password is null)
             {
-                Login = dto.Login,
-                PasswordHash = dto.PasswordHash,
-                Description = dto.Description,
-                Owner = dto.Owner,
-                Website = dto.Website
-            };
-            await _passwordRepository.AddAsync(pass);
-            return Ok(pass);
+                return NotFound();
+            }
+
+            return Ok(password);
+        }
+        
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<PasswordDto>>> BrowseAsync()
+            => Ok(await _passwordService.BrowseAsync());
+        
+        [HttpPost]
+        public async Task<ActionResult> AddAsync(CreatePasswordCommand command)
+        {
+            await _passwordService.AddAsync(command);
+            return Ok();
+        }
+
+        [HttpDelete]
+        public async Task<ActionResult> DeleteAsync(DeletePasswordCommand command)
+        {
+            await _passwordService.DeleteAsync(command);
+            return Ok();
         }
     }
 }
