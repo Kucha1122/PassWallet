@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Chilkat;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto.Paddings;
@@ -90,6 +91,14 @@ namespace PassWallet.Infrastructure.Extensions
                 rngCsp.GetBytes(randomBytes);
             }
             return randomBytes;
+        }
+        
+        public string GenerateRandomSalt()
+        {
+            Prng prng = new Prng();
+            string salt = prng.GetEntropy(16, "base64");
+
+            return salt;
         }
     }
 }
