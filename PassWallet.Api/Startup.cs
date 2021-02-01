@@ -12,7 +12,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using PassWallet.Core.Repositories;
 using PassWallet.Infrastructure.DAL.DataContext;
+using PassWallet.Infrastructure.DAL.Repositories;
+using PassWallet.Infrastructure.Services;
 
 namespace PassWallet.Api
 {
@@ -30,6 +33,8 @@ namespace PassWallet.Api
         {
             services.AddControllers();
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DB")));
+            services.AddTransient<IPasswordRepository, PasswordRepository>();
+            services.AddScoped<IPasswordService, PasswordService>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "PassWallet.Api", Version = "v1"});

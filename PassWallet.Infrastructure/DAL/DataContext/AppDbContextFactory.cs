@@ -8,7 +8,8 @@ namespace PassWallet.Infrastructure.DAL.DataContext
         public AppDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=PassWalletDB;MultipleActiveResultSets=true");
+            optionsBuilder.UseSqlServer(
+                "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=PassWalletDB;MultipleActiveResultSets=true");
 
             return new AppDbContext(optionsBuilder.Options);
         }
