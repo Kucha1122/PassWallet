@@ -1,36 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using PassWallet.Core.Entities;
 using PassWallet.Core.Repositories;
+using PassWallet.Infrastructure.DAL.DataContext;
 
 namespace PassWallet.Infrastructure.DAL.Repositories
 {
     public class PasswordRepository : IPasswordRepository
     {
-        public Task<Password> GetAsync(Guid id)
+        private readonly AppDbContext _context;
+
+        public PasswordRepository(AppDbContext context)
         {
-            throw new NotImplementedException();
+            _context = context;
+        }
+        public async Task<Password> GetAsync(Guid id)
+            => await Task.FromResult(_context.Passwords.SingleOrDefault(x => x.Id == id));
+
+
+        public async Task<IEnumerable<Password>> BrowseAsync()
+        {
+            var passwords = _context.Passwords.AsEnumerable();
+            
+            return await Task.FromResult(passwords);
         }
 
-        public Task<IEnumerable<Password>> BrowseAsync()
+        public async Task AddAsync(Password password)
         {
-            throw new NotImplementedException();
+            _context.Passwords.Add(password);
+            await _context.SaveChangesAsync();
+
+            await Task.CompletedTask;
         }
 
-        public Task AddAsync(Password password)
+        public async Task UpdateAsync(Password password)
         {
-            throw new NotImplementedException();
+            _context.Passwords.Attach(password);
+            _context.Entry(password).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            await Task.CompletedTask;
         }
 
-        public Task UpdateAsync(Password password)
+        public async Task DeleteAsync(Password password)
         {
-            throw new NotImplementedException();
-        }
+            _context.Passwords.Remove(password);
+            await _context.SaveChangesAsync();
 
-        public Task DeleteAsync(Password password)
-        {
-            throw new NotImplementedException();
+            await Task.CompletedTask;
         }
     }
 }

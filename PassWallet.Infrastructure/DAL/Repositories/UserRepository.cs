@@ -1,36 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using PassWallet.Core.Entities;
 using PassWallet.Core.Repositories;
+using PassWallet.Infrastructure.DAL.DataContext;
 
 namespace PassWallet.Infrastructure.DAL.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        public Task<User> GetAsync(Guid id)
+        private readonly AppDbContext _context;
+
+        public UserRepository(AppDbContext context)
         {
-            throw new NotImplementedException();
+            _context = context;
+        }
+        public async Task<User> GetAsync(Guid id)
+            => await Task.FromResult(_context.Users.SingleOrDefault(x => x.Id == id));
+        
+        public async Task<IEnumerable<User>> BrowseAsync()
+        {
+            var users = _context.Users.AsEnumerable();
+
+            return await Task.FromResult(users);
         }
 
-        public Task<IEnumerable<User>> BrowseAsync()
+        public async Task AddAsync(User user)
         {
-            throw new NotImplementedException();
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            await Task.CompletedTask;
         }
 
-        public Task AddAsync(User user)
+        public async Task UpdateAsync(User user)
         {
-            throw new NotImplementedException();
+            _context.Users.Attach(user);
+            _context.Entry(user).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            await Task.CompletedTask;
+
         }
 
-        public Task UpdateAsync(User user)
+        public async Task DeleteAsync(User user)
         {
-            throw new NotImplementedException();
-        }
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
 
-        public Task DeleteAsync(User user)
-        {
-            throw new NotImplementedException();
+            await Task.CompletedTask;
         }
     }
 }

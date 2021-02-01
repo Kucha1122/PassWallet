@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PassWallet.Core.Entities;
 
 namespace PassWallet.Infrastructure.DAL.DataContext
 {
@@ -8,5 +9,8 @@ namespace PassWallet.Infrastructure.DAL.DataContext
         {
             
         }
+        
+        public DbSet<User> Users { get; set; }
+        public DbSet<Password> Passwords { get; set; }
     }
 }
