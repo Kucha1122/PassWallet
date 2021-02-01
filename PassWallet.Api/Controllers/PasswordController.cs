@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Xml;
 using Microsoft.AspNetCore.Mvc;
-using PassWallet.Core.Entities;
-using PassWallet.Core.Repositories;
-using PassWallet.Infrastructure.DAL.Repositories;
 using PassWallet.Infrastructure.DTO;
 using PassWallet.Infrastructure.DTO.Commands;
 using PassWallet.Infrastructure.Services;

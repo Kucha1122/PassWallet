@@ -59,7 +59,7 @@ namespace PassWallet.Infrastructure.Services
             }).ToList();
         }
 
-        public async Task Register(RegisterUserCommand command)
+        public async Task RegisterAsync(RegisterUserCommand command)
         {
             var user = await _userRepository.GetAsync(command.Login);
             if (user != null)
@@ -71,6 +71,7 @@ namespace PassWallet.Infrastructure.Services
             {
                 Login = command.Login,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(command.Password + salt),
+                Salt = salt,
                 Passwords = new List<Password>()
             };
             user.SetRole("user");
@@ -78,7 +79,7 @@ namespace PassWallet.Infrastructure.Services
             await _userRepository.AddAsync(user);
         }
 
-        public async Task<TokenDto> Login(LoginUserCommand command)
+        public async Task<TokenDto> LoginAsync(LoginUserCommand command)
         {
             var user = await _userRepository.GetAsync(command.Login);
             if (user is null)

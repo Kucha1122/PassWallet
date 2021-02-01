@@ -12,7 +12,7 @@ namespace PassWallet.Infrastructure.Services
     {
         Task<UserDto> GetAsync(Guid id);
         Task<IEnumerable<UserDto>> BrowseAsync();
-        Task Register(RegisterUserCommand command);
-        Task<TokenDto> Login(LoginUserCommand command);
+        Task RegisterAsync(RegisterUserCommand command);
+        Task<TokenDto> LoginAsync(LoginUserCommand command);
     }
 }
