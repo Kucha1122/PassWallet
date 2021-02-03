@@ -4,12 +4,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using PassWallet.Core.Entities;
 using PassWallet.Core.Repositories;
 using PassWallet.Infrastructure.DAL.DataContext;
 
 namespace PassWallet.Infrastructure.DAL.Repositories
 {
-    public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
+    public class Repository<TEntity> : IRepository<TEntity> where TEntity : Entity
     {
         protected readonly AppDbContext _context;
 
@@ -63,7 +64,6 @@ namespace PassWallet.Infrastructure.DAL.Repositories
         {
             _context.Set<TEntity>().Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
             await Task.CompletedTask;
         }
     }

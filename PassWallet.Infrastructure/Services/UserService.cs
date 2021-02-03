@@ -78,6 +78,7 @@ namespace PassWallet.Infrastructure.Services
             user.SetRole("user");
             
             await _unitOfWork.Users.AddAsync(user);
+            _unitOfWork.Complete();
         }
 
         public async Task<TokenDto> LoginAsync(LoginUserCommand command)

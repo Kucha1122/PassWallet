@@ -18,7 +18,7 @@ namespace PassWallet.Infrastructure.DAL.Repositories
 
         public async Task<User> GetAsync(string login)
         {
-            return await _context.Users.FindAsync(login);
+            return await _context.Users.SingleOrDefaultAsync(x => x.Login == login);
         }
         
     }

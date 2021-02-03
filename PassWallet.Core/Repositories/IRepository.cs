@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using PassWallet.Core.Entities;
 
 namespace PassWallet.Core.Repositories
 {
-    public interface IRepository<TEntity> where TEntity : class
+    public interface IRepository<TEntity> where TEntity : Entity
     {
         Task<TEntity> GetAsync(Guid id);
         Task<IEnumerable<TEntity>> GetAllAsync();

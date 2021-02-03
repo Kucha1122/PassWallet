@@ -92,6 +92,7 @@ namespace PassWallet.Infrastructure.Services
             };
             
             await _unitOfWork.Passwords.AddAsync(password);
+            _unitOfWork.Complete();
         }
 
         public async Task UpdateAsync(UpdatePasswordCommand command)
@@ -102,6 +103,7 @@ namespace PassWallet.Infrastructure.Services
             
             password.PasswordHash = _passwordEncoder.Encrypt(command.PasswordHash, command.VaultKey);
             await _unitOfWork.Passwords.UpdateAsync(password);
+            _unitOfWork.Complete();
         }
 
         public async Task DeleteAsync(DeletePasswordCommand command)
@@ -111,6 +113,7 @@ namespace PassWallet.Infrastructure.Services
                 throw new PasswordNotFoundException(command.Id);
             
             await _unitOfWork.Passwords.RemoveAsync(password);
+            _unitOfWork.Complete();
         }
     }
 }

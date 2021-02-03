@@ -8,9 +8,7 @@ namespace PassWallet.Infrastructure.DAL
     public class UnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext _context;
-        public IUserRepository Users { get; private set; }
-        public IPasswordRepository Passwords { get; private set; }
-
+        
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
@@ -18,6 +16,9 @@ namespace PassWallet.Infrastructure.DAL
             Passwords = new PasswordRepository(_context);
         }
 
+        public IUserRepository Users { get; private set; }
+        public IPasswordRepository Passwords { get; private set; }
+        
         public int Complete()
         {
             return _context.SaveChanges();
