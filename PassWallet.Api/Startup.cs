@@ -15,7 +15,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PassWallet.Core.Interfaces;
 using PassWallet.Core.Repositories;
+using PassWallet.Infrastructure.DAL;
 using PassWallet.Infrastructure.DAL.DataContext;
 using PassWallet.Infrastructure.DAL.Repositories;
 using PassWallet.Infrastructure.Handlers;
@@ -40,6 +42,7 @@ namespace PassWallet.Api
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DB")));
             services.AddTransient<IPasswordRepository, PasswordRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPasswordService, PasswordService>();
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<IJwtHandler, JwtHandler>();

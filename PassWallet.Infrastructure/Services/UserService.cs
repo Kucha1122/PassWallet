@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Org.BouncyCastle.Crypto.Generators;
 using PassWallet.Core.Entities;
+using PassWallet.Core.Interfaces;
 using PassWallet.Core.Repositories;
 using PassWallet.Infrastructure.DTO;
 using PassWallet.Infrastructure.DTO.User.Commands;
@@ -16,20 +17,20 @@ namespace PassWallet.Infrastructure.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly PasswordEncoder _passwordEncoder;
         private readonly IJwtHandler _jwtHandler;
 
-        public UserService(IUserRepository userRepository, IJwtHandler jwtHandler)
+        public UserService(IUnitOfWork unitOfWork, IJwtHandler jwtHandler)
         {
-            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
             _passwordEncoder = new PasswordEncoder();
             _jwtHandler = jwtHandler;
         }
         
         public async Task<UserDto> GetAsync(Guid id)
         {
-            var user = await _userRepository.GetAsync(id);
+            var user = await _unitOfWork.Users.GetAsync(id);
             
             return user is not null
                 ? new UserDto
@@ -37,7 +38,7 @@ namespace PassWallet.Infrastructure.Services
                     Id = user.Id,
                     Login = user.Login,
                     PasswordHash = user.PasswordHash,
-                    Passwords = user.Passwords,
+                    Passwords = user.Passwords.ToList(),
                     Salt = user.Salt,
                     Role = user.Role
                 }
@@ -46,14 +47,14 @@ namespace PassWallet.Infrastructure.Services
 
         public async Task<IEnumerable<UserDto>> BrowseAsync()
         {
-            var users = await _userRepository.BrowseAsync();
+            var users = await _unitOfWork.Users.GetAllAsync();
 
             return users.Select(x => new UserDto()
             {
                 Id = x.Id,
                 PasswordHash = x.PasswordHash,
                 Login = x.Login,
-                Passwords = x.Passwords,
+                Passwords = x.Passwords.ToList(),
                 Salt = x.Salt,
                 Role = x.Role
             }).ToList();
@@ -61,7 +62,7 @@ namespace PassWallet.Infrastructure.Services
 
         public async Task RegisterAsync(RegisterUserCommand command)
         {
-            var user = await _userRepository.GetAsync(command.Login);
+            var user = await _unitOfWork.Users.GetAsync(command.Login);
             if (user != null)
                 throw new UserAlreadyExistException(command.Login);
 
@@ -76,12 +77,12 @@ namespace PassWallet.Infrastructure.Services
             };
             user.SetRole("user");
             
-            await _userRepository.AddAsync(user);
+            await _unitOfWork.Users.AddAsync(user);
         }
 
         public async Task<TokenDto> LoginAsync(LoginUserCommand command)
         {
-            var user = await _userRepository.GetAsync(command.Login);
+            var user = await _unitOfWork.Users.GetAsync(command.Login);
             if (user is null)
                 throw new UserNotFoundException(command.Login);
 

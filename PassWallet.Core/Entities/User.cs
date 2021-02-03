@@ -13,7 +13,7 @@ namespace PassWallet.Core.Entities
         public string PasswordHash { get; set; }
         public string Salt { get; set; }
         public string Role { get; set; }
-        public List<Password> Passwords { get; set; }
+        public virtual ICollection<Password> Passwords { get; set; }
 
         public void SetRole(string role)
         {

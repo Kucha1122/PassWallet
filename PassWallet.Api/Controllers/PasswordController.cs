@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +14,12 @@ namespace PassWallet.Api.Controllers
     public class PasswordController : ControllerBase
     {
         private readonly IPasswordService _passwordService;
+        private readonly IUserService _userService;
 
-        public PasswordController(IPasswordService passwordService)
+        public PasswordController(IPasswordService passwordService, IUserService userService)
         {
             _passwordService = passwordService;
+            _userService = userService;
         }
         
         [HttpGet("{id}")]
@@ -31,18 +34,23 @@ namespace PassWallet.Api.Controllers
             return Ok(password);
         }
         
-        [HttpGet]
+        [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<PasswordDto>>> BrowseAsync()
             => Ok(await _passwordService.BrowseAsync());
+
+        [HttpPost("all")]
+        public async Task<ActionResult<IEnumerable<PasswordDto>>> BrowseAsync([FromBody] GetPasswordsCommand command)
+            => Ok(await _passwordService.BrowseAsync(command.Id));
         
-        [HttpPost]
+        [HttpPost("add")]
         public async Task<ActionResult> AddAsync(CreatePasswordCommand command)
         {
-            await _passwordService.AddAsync(command);
+            var user = await _userService.GetAsync(command.OwnerId);
+            await _passwordService.AddAsync(command, user);
             return Ok();
         }
 
-        [HttpDelete]
+        [HttpDelete("delete")]
         public async Task<ActionResult> DeleteAsync(DeletePasswordCommand command)
         {
             await _passwordService.DeleteAsync(command);

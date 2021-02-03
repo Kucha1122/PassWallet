@@ -1,4 +1,6 @@
-﻿namespace PassWallet.Infrastructure.DTO.Commands
+﻿using System;
+
+namespace PassWallet.Infrastructure.DTO.Commands
 {
     public class CreatePasswordCommand
     {
@@ -7,6 +9,7 @@
         public string Login { get; set; }
         public string Description { get; set; }
         public string Owner { get; set; }
+        public Guid OwnerId { get; set; }
         public string VaultKey { get; set; }
     }
 }

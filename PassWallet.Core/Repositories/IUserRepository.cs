@@ -6,14 +6,8 @@ using PassWallet.Core.Entities;
 
 namespace PassWallet.Core.Repositories
 {
-    public interface IUserRepository
+    public interface IUserRepository : IRepository<User>
     {
-        Task<User> GetAsync(Guid id);
         Task<User> GetAsync(string login);
-        Task<IEnumerable<User>> BrowseAsync();
-        Task AddAsync(User user);
-        Task UpdateAsync(User user);
-        Task DeleteAsync(User user);
-
     }
 }

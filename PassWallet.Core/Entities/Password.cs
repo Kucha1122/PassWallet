@@ -7,6 +7,7 @@
         public string Login { get; set; }
         public string Description { get; set; }
         public string Owner { get; set; }
+        public virtual User User { get; set; }
         public bool IsDeleted { get; set; }
         
     }
