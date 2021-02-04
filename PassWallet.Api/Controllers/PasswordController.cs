@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using PassWallet.Infrastructure.DTO;
 using PassWallet.Infrastructure.DTO.Commands;
 using PassWallet.Infrastructure.Services;
+using PassWallet.Infrastructure.Exceptions;
 
 namespace PassWallet.Api.Controllers
 {
@@ -26,7 +27,7 @@ namespace PassWallet.Api.Controllers
         }
         
         [Authorize]
-        [HttpGet("{id}")]
+        [HttpGet("single")]
         public async Task<ActionResult<PasswordDto>> GetAsync(Guid id)
         {
             var password = await _passwordService.GetAsync(id);
@@ -39,7 +40,7 @@ namespace PassWallet.Api.Controllers
             return Ok(password);
         }
         
-        [HttpGet("all")]
+        [HttpGet("allAdmin")]
         public async Task<ActionResult<IEnumerable<PasswordDto>>> BrowseAsync()
             => Ok(await _passwordService.BrowseAsync());
 
@@ -48,20 +49,32 @@ namespace PassWallet.Api.Controllers
         public async Task<ActionResult<IEnumerable<PasswordDto>>> BrowseAsyncById()
         {
             var userId = User.Claims
-                .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+                .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)
+                ?.Value;
+            if (String.IsNullOrWhiteSpace(userId))
+                throw new ArgumentNullException(
+                    $"User with ID: {userId} does not exist.",userId);
             
             return Ok(await _passwordService.BrowseAsync(
                 new GetPasswordsByUserCommand(Guid.Parse(userId))));
         }
 
         [Authorize]
-        [HttpPost("id/{id}")]
+        [HttpPost("decrypted")]
         public async Task<ActionResult<PasswordDto>> GetDecryptedPassword(GetDecryptedPassword command)
         {
             var userId = User.Claims
-                .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
-
-            return Ok(await _passwordService.GetDecryptedPassword(command, Guid.Parse(userId)));
+                .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)
+                ?.Value;
+            if (String.IsNullOrWhiteSpace(userId))
+                throw new ArgumentNullException(
+                    $"User with ID: {userId} does not exist.",userId);
+            var password = await _passwordService
+                .GetDecryptedPassword(command, Guid.Parse(userId));
+            
+            if (password is null)
+                return NotFound();
+            return Ok(password);
         }
 
         
@@ -69,7 +82,10 @@ namespace PassWallet.Api.Controllers
         [HttpPost("add")]
         public async Task<ActionResult> AddAsync(CreatePasswordCommand command)
         {
-            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (String.IsNullOrWhiteSpace(userId))
+                throw new ArgumentNullException(
+                    $"User with ID: {userId} does not exist.",userId);
 
             await _passwordService.AddAsync(command, Guid.Parse(userId));
             return Ok();
@@ -78,6 +94,10 @@ namespace PassWallet.Api.Controllers
         [HttpDelete("delete")]
         public async Task<ActionResult> DeleteAsync(DeletePasswordCommand command)
         {
+            if (command.PasswordId == null || command.PasswordId == Guid.Empty)
+                throw new ArgumentNullException(
+                    $"Password with ID: {command.PasswordId} does not exist.", command.PasswordId.ToString());
+            
             await _passwordService.DeleteAsync(command);
             return Ok();
         }
