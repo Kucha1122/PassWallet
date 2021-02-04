@@ -47,9 +47,21 @@ namespace PassWallet.Api.Controllers
         [HttpPost("all")]
         public async Task<ActionResult<IEnumerable<PasswordDto>>> BrowseAsyncById()
         {
-            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            var userId = User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
             
-            return Ok(await _passwordService.BrowseAsync(Guid.Parse(userId)));
+            return Ok(await _passwordService.BrowseAsync(
+                new GetPasswordsByUserCommand(Guid.Parse(userId))));
+        }
+
+        [Authorize]
+        [HttpPost("id/{id}")]
+        public async Task<ActionResult<PasswordDto>> GetDecryptedPassword(GetDecryptedPassword command)
+        {
+            var userId = User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+
+            return Ok(await _passwordService.GetDecryptedPassword(command, Guid.Parse(userId)));
         }
 
         
@@ -58,9 +70,8 @@ namespace PassWallet.Api.Controllers
         public async Task<ActionResult> AddAsync(CreatePasswordCommand command)
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
-            command.OwnerId = Guid.Parse(userId);
-            
-            await _passwordService.AddAsync(command);
+
+            await _passwordService.AddAsync(command, Guid.Parse(userId));
             return Ok();
         }
 

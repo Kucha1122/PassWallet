@@ -4,6 +4,6 @@ namespace PassWallet.Infrastructure.DTO.Commands
 {
     public class GetPasswordsCommand
     {
-        public Guid Id { get; set; }
+        public Guid PasswordId { get; set; }
     }
 }

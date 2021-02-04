@@ -8,8 +8,6 @@ namespace PassWallet.Infrastructure.DTO.Commands
         public string Website { get; set; }
         public string Login { get; set; }
         public string Description { get; set; }
-        public string Owner { get; set; }
-        public Guid OwnerId { get; set; }
         public string VaultKey { get; set; }
     }
 }

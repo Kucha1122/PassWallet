@@ -40,12 +40,13 @@ namespace PassWallet.Api
         {
             services.AddControllers();
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DB")));
+            services.AddTransient<AppDbContext>();
             services.AddTransient<IPasswordRepository, PasswordRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
             services.AddTransient<IUnitOfWork, UnitOfWork>();
-            services.AddTransient<IPasswordService, PasswordService>();
-            services.AddTransient<IUserService, UserService>();
+            services.AddScoped<IPasswordService, PasswordService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddSingleton<IJwtHandler, JwtHandler>();
             services.Configure<JwtSettings>(Configuration.GetSection("jwt"));
             services.AddCors();

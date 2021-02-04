@@ -2,8 +2,9 @@
 
 namespace PassWallet.Infrastructure.DTO.Commands
 {
-    public class DeletePasswordCommand
+    public class GetDecryptedPassword
     {
         public Guid PasswordId { get; set; }
+        public string VaultKey { get; set; }
     }
 }

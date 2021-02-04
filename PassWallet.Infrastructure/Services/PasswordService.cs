@@ -4,10 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using PassWallet.Core.Entities;
 using PassWallet.Core.Interfaces;
-using PassWallet.Core.Repositories;
 using PassWallet.Infrastructure.DTO;
 using PassWallet.Infrastructure.DTO.Commands;
-using PassWallet.Infrastructure.DTO.User.Queries;
 using PassWallet.Infrastructure.Exceptions;
 using PassWallet.Infrastructure.Extensions;
 
@@ -41,6 +39,25 @@ namespace PassWallet.Infrastructure.Services
                 : default;
         }
 
+        public async Task<PasswordDto> GetDecryptedPassword(GetDecryptedPassword command, Guid userId)
+        {
+            var password = await _unitOfWork.Passwords.GetAsync(command.PasswordId);
+            var currentUser = await _unitOfWork.Users.GetAsync(userId);
+
+            return password is not null
+                ? new PasswordDto
+                {
+                    Id = password.Id,
+                    PasswordHash = _passwordEncoder.Decrypt(password.PasswordHash,
+                        (currentUser.Login + command.VaultKey + password.Login)),
+                    Website = password.Website,
+                    Login = password.Login,
+                    Description = password.Description,
+                    Owner = password.Owner
+                }
+                : default;
+        }
+
         public async Task<IEnumerable<PasswordDto>> BrowseAsync()
         {
             var passwords = await _unitOfWork.Passwords.GetAllAsync();
@@ -56,11 +73,11 @@ namespace PassWallet.Infrastructure.Services
             }).ToList();
         }
 
-        public async Task<IEnumerable<PasswordDto>> BrowseAsync(Guid id)
+        public async Task<IEnumerable<PasswordDto>> BrowseAsync(GetPasswordsByUserCommand command)
         {
-            var passwords = await _unitOfWork.Passwords.FindAsync(x => x.User.Id == id);
+            var passwords = await _unitOfWork.Passwords.FindAsync(x => x.User.Id == command.UserId);
 
-            return passwords.Select(x => new PasswordDto()
+            return passwords.Select(x => new PasswordDto
             {
                 Id = x.Id,
                 PasswordHash = x.PasswordHash,
@@ -71,17 +88,17 @@ namespace PassWallet.Infrastructure.Services
             }).ToList();
         }
 
-        public async Task AddAsync(CreatePasswordCommand command)
+        public async Task AddAsync(CreatePasswordCommand command, Guid userId)
         {
-            var currentUser = await _unitOfWork.Users.GetAsync(command.OwnerId);
+            var currentUser = await _unitOfWork.Users.GetAsync(userId);
             
             var password = new Password
             {
-                PasswordHash = _passwordEncoder.Encrypt(command.PasswordHash, command.VaultKey),
+                PasswordHash = _passwordEncoder.Encrypt(command.PasswordHash, (currentUser.Login+command.VaultKey+command.Login)),
                 Website = command.Website,
                 Login = command.Login,
                 Description = command.Description,
-                Owner = command.Owner,
+                Owner = currentUser.Login,
                 User = currentUser
             };
 
@@ -102,9 +119,9 @@ namespace PassWallet.Infrastructure.Services
 
         public async Task DeleteAsync(DeletePasswordCommand command)
         {
-            var password = await _unitOfWork.Passwords.GetAsync(command.Id);
+            var password = await _unitOfWork.Passwords.GetAsync(command.PasswordId);
             if (password is null)
-                throw new PasswordNotFoundException(command.Id);
+                throw new PasswordNotFoundException(command.PasswordId);
             
             await _unitOfWork.Passwords.RemoveAsync(password);
             _unitOfWork.Complete();
