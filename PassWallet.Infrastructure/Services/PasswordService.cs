@@ -43,6 +43,8 @@ namespace PassWallet.Infrastructure.Services
         {
             var password = await _unitOfWork.Passwords.GetAsync(command.PasswordId);
             var currentUser = await _unitOfWork.Users.GetAsync(userId);
+            if (currentUser is null)
+                throw new UserNotFoundException(currentUser.Id);
 
             return password is not null
                 ? new PasswordDto
@@ -75,7 +77,8 @@ namespace PassWallet.Infrastructure.Services
 
         public async Task<IEnumerable<PasswordDto>> BrowseAsync(GetPasswordsByUserCommand command)
         {
-            var passwords = await _unitOfWork.Passwords.FindAsync(x => x.User.Id == command.UserId);
+            var passwords = await _unitOfWork.Passwords.FindAsync(
+                x => x.User.Id == command.UserId);
 
             return passwords.Select(x => new PasswordDto
             {
@@ -91,6 +94,8 @@ namespace PassWallet.Infrastructure.Services
         public async Task AddAsync(CreatePasswordCommand command, Guid userId)
         {
             var currentUser = await _unitOfWork.Users.GetAsync(userId);
+            if (currentUser is null)
+                throw new UserNotFoundException(currentUser.Id);
             
             var password = new Password
             {
@@ -106,13 +111,17 @@ namespace PassWallet.Infrastructure.Services
             _unitOfWork.Complete();
         }
 
-        public async Task UpdateAsync(UpdatePasswordCommand command)
+        public async Task UpdateAsync(UpdatePasswordCommand command, Guid userId)
         {
-            var password = await _unitOfWork.Passwords.GetAsync(command.Id);
-            if (password is null)
-                throw new PasswordNotFoundException(command.Id);
+            var currentUser = await _unitOfWork.Users.GetAsync(userId);
+            if (currentUser is null)
+                throw new UserNotFoundException(currentUser.Id);
             
-            password.PasswordHash = _passwordEncoder.Encrypt(command.PasswordHash, command.VaultKey);
+            var password = await _unitOfWork.Passwords.GetAsync(command.PasswordId);
+            if (password is null)
+                throw new PasswordNotFoundException(command.PasswordId);
+            
+            password.PasswordHash = _passwordEncoder.Encrypt(command.NewPassword, (currentUser.Login+command.VaultKey+password.Login));
             await _unitOfWork.Passwords.UpdateAsync(password);
             _unitOfWork.Complete();
         }

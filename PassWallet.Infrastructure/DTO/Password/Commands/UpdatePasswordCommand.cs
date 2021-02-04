@@ -4,8 +4,9 @@ namespace PassWallet.Infrastructure.DTO.Commands
 {
     public class UpdatePasswordCommand
     {
-        public Guid Id { get; set; }
-        public string PasswordHash { get; set; }
+        public Guid PasswordId { get; set; }
+        public string CurrentPassword { get; set; }
+        public string NewPassword { get; set; }
         public string VaultKey { get; set; }
     }
 }

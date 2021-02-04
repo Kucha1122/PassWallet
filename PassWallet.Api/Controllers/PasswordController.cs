@@ -101,5 +101,22 @@ namespace PassWallet.Api.Controllers
             await _passwordService.DeleteAsync(command);
             return Ok();
         }
+
+        [HttpPut("update")]
+        public async Task<ActionResult> UpdateAsync(UpdatePasswordCommand command)
+        {
+            var userId = User.Claims.FirstOrDefault(
+                c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (String.IsNullOrWhiteSpace(userId))
+                throw new ArgumentNullException(
+                    $"User with ID: {userId} does not exist.",userId);
+
+            if (command.PasswordId == null || command.PasswordId == Guid.Empty)
+                throw new ArgumentException(
+                    $"Password with ID: {command.PasswordId} does not exist.", command.PasswordId.ToString());
+            
+            await _passwordService.UpdateAsync(command, Guid.Parse(userId));
+            return Ok();
+        }
     }
 }
