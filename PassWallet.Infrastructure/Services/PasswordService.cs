@@ -71,8 +71,10 @@ namespace PassWallet.Infrastructure.Services
             }).ToList();
         }
 
-        public async Task AddAsync(CreatePasswordCommand command, UserDto dto)
+        public async Task AddAsync(CreatePasswordCommand command)
         {
+            var currentUser = await _unitOfWork.Users.GetAsync(command.OwnerId);
+            
             var password = new Password
             {
                 PasswordHash = _passwordEncoder.Encrypt(command.PasswordHash, command.VaultKey),
@@ -80,17 +82,9 @@ namespace PassWallet.Infrastructure.Services
                 Login = command.Login,
                 Description = command.Description,
                 Owner = command.Owner,
-                User = new User
-                {
-                    Login = dto.Login,
-                    PasswordHash = dto.PasswordHash,
-                    Salt = dto.Salt,
-                    Role = dto.Role,
-                    Passwords = dto.Passwords
-                }
-                
+                User = currentUser
             };
-            
+
             await _unitOfWork.Passwords.AddAsync(password);
             _unitOfWork.Complete();
         }

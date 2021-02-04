@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PassWallet.Infrastructure.DTO;
 using PassWallet.Infrastructure.DTO.Commands;
@@ -22,10 +25,12 @@ namespace PassWallet.Api.Controllers
             _userService = userService;
         }
         
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<PasswordDto>> GetAsync(Guid id)
         {
             var password = await _passwordService.GetAsync(id);
+            
             if (password is null)
             {
                 return NotFound();
@@ -38,15 +43,24 @@ namespace PassWallet.Api.Controllers
         public async Task<ActionResult<IEnumerable<PasswordDto>>> BrowseAsync()
             => Ok(await _passwordService.BrowseAsync());
 
+        [Authorize]
         [HttpPost("all")]
-        public async Task<ActionResult<IEnumerable<PasswordDto>>> BrowseAsync([FromBody] GetPasswordsCommand command)
-            => Ok(await _passwordService.BrowseAsync(command.Id));
+        public async Task<ActionResult<IEnumerable<PasswordDto>>> BrowseAsyncById()
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            
+            return Ok(await _passwordService.BrowseAsync(Guid.Parse(userId)));
+        }
+
         
+        [Authorize]
         [HttpPost("add")]
         public async Task<ActionResult> AddAsync(CreatePasswordCommand command)
         {
-            var user = await _userService.GetAsync(command.OwnerId);
-            await _passwordService.AddAsync(command, user);
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            command.OwnerId = Guid.Parse(userId);
+            
+            await _passwordService.AddAsync(command);
             return Ok();
         }
 

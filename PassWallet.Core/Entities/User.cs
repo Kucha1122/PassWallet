@@ -8,7 +8,11 @@ namespace PassWallet.Core.Entities
         {
             "user", "admin"
         };
-        
+
+        public User()
+        {
+            Passwords = new HashSet<Password>(); 
+        }
         public string Login { get; set; }
         public string PasswordHash { get; set; }
         public string Salt { get; set; }
