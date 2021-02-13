@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using PassWallet.Infrastructure.DTO;
 using PassWallet.Infrastructure.DTO.Commands;
@@ -10,6 +11,7 @@ namespace PassWallet.Api.Controllers
 {    
     [ApiController]
     [Route("[controller]")]
+    [EnableCors("MyPolicy")]
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -26,7 +28,7 @@ namespace PassWallet.Api.Controllers
             {
                 await _userService.RegisterAsync(command);
             }
-            return Ok("User registered.");
+            return Created("User registered.", command);
         }
 
         [HttpPost("login")]

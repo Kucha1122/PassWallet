@@ -88,21 +88,19 @@ namespace PassWallet.Infrastructure.Services
                 throw new UserNotFoundException(command.Login);
 
             bool isValidPassword = BCrypt.Net.BCrypt.Verify(command.Password + user.Salt, user.PasswordHash);
-            if (isValidPassword)
+            if (!isValidPassword)
+                throw new InvalidCredentialsException();
+            
+            var jwt = _jwtHandler.CreateToken(user.Id, user.Role);
+
+            return new TokenDto
             {
-                var jwt = _jwtHandler.CreateToken(user.Id, user.Role);
-
-                return new TokenDto
-                {
-                    Id = user.Id,
-                    Token = jwt.Token,
-                    Expires = jwt.Expires,
-                    Role = user.Role,
-                    Login = user.Login
-                };
-            }
-
-            throw new InvalidCredentialsException();
+                Id = user.Id,
+                Token = jwt.Token,
+                Expires = jwt.Expires,
+                Role = user.Role,
+                Login = user.Login
+            };
         }
     }
 }

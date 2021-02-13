@@ -4,7 +4,7 @@ namespace PassWallet.Core.Entities
 {
     public class User : Entity
     {
-        private static List<string> _roles = new List<string>
+        private static List<string> _roles = new()
         {
             "user", "admin"
         };
@@ -21,15 +21,18 @@ namespace PassWallet.Core.Entities
 
         public void SetRole(string role)
         {
-            if (!string.IsNullOrWhiteSpace(role))
+            if (string.IsNullOrWhiteSpace(role))
             {
-                role = role.ToLowerInvariant();
-                if (_roles.Contains(role))
-                {
-                    Role = role;
-                }
+                return;
+            }
+            
+            role = role.ToLowerInvariant();
+            if (_roles.Contains(role))
+            {
+                Role = role;
             }
         }
+        
         
     }
 }

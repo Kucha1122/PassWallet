@@ -2,7 +2,8 @@
 {
     public class InvalidCredentialsException : CustomException
     {
-        public InvalidCredentialsException() : base($"Invalid credentials.")
+        public InvalidCredentialsException() 
+            : base($"Invalid credentials.")
         {
         }
     }

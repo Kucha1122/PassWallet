@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using PassWallet.Infrastructure.DTO;
 using PassWallet.Infrastructure.DTO.Commands;
@@ -15,6 +16,7 @@ namespace PassWallet.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [EnableCors("MyPolicy")]
     public class PasswordController : ControllerBase
     {
         private readonly IPasswordService _passwordService;
