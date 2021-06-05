@@ -22,7 +22,7 @@
 
 ## Screenshots
 
-![Dashboard](https://prnt.sc/148ygzb "Dashboard")
+![Dashboard](https://prnt.sc/148ygzb)
 
 
 ## Future Updates
