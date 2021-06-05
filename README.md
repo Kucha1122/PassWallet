@@ -22,7 +22,7 @@
 
 ## Screenshots
 
-![Dashboard](https://prnt.sc/148ygzb)
+![Dashboard](https://user-images.githubusercontent.com/25044505/120904906-fb40aa80-c64e-11eb-84a4-3c6952602429.png)
 
 
 ## Future Updates
